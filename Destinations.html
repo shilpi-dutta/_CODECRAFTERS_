@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explore Johar Jharkhand</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      color: #fff;
+      background: #111; /* keep black tone */
+    }
+
+    /* Overlay */
+    .overlay {
+      background: rgba(0, 0, 0, 0.6);
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .overlay h1 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      color: #ffcc00;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .overlay p {
+      font-size: 1.2rem;
+      max-width: 800px;
+      margin: auto;
+      color: #ddd;
+    }
+
+    /* Places Section */
+    .places {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      padding: 40px;
+    }
+
+    .place-card {
+      background: rgba(0, 0, 0, 0.75);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform 0.3s;
+    }
+
+    .place-card:hover {
+      transform: scale(1.05);
+    }
+
+    .place-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .place-card h3 {
+      margin: 15px;
+      font-size: 1.5rem;
+      color: #ffcc00;
+    }
+
+    .place-card p {
+      margin: 0 15px 15px;
+      color: #ddd;
+    }
+
+    /* Full-width video section */
+    .video-section {
+      position: relative;
+      width: 100%;
+      height: 70vh; /* adjust height */
+      overflow: hidden;
+      margin-top: 30px;
+      border-top: 4px solid #222;
+      border-bottom: 4px solid #222;
+    }
+
+    .video-section video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* make sure it fills */
+    }
+
+    /* Back button */
+    .back-home {
+      display: block;
+      margin: 30px auto;
+      text-align: center;
+    }
+
+    .back-home a {
+      background: #ffcc00;
+      color: #000;
+      padding: 12px 25px;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+
+    .back-home a:hover {
+      background: #e6b800;
+    }
+  </style>
+</head>
+<body>
+  <!-- Overlay Hero -->
+  <div class="overlay">
+    <h1>Explore Johar Jharkhand</h1>
+    <p>Discover the rich culture, tribal heritage, waterfalls, hills, and national parks of Jharkhand. Experience nature and traditions like never before.</p>
+  </div>
+
+  <!-- Places to Visit -->
+  <section class="places">
+    <div class="place-card">
+      <img src="https://travelsetu.com/apps/uploads/new_destinations_photos/destination/2024/01/08/9ffc869f0419cc62a4e18896dc9b388b_1000x1000.jpg" alt="Netarhat">
+      <h3>Netarhat</h3>
+      <p>The Queen of Chotanagpur, known for sunrise and sunset views amidst lush forests.</p>
+    </div>
+
+    <div class="place-card">
+      <img src="https://cdn1.tripoto.com/media/filter/nl/img/2380291/Image/1698489734_eub3s7iu0aa0uda.jpg.webp" alt="Betla National Park">
+      <h3>Betla National Park</h3>
+      <p>A wildlife paradise with elephants, tigers, and rich biodiversity.</p>
+    </div>
+
+    <div class="place-card">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCd7dvJ-QUiB3CZCFfa2Q-iPhWyES9KyWwMw&s" alt="Hundru Falls">
+      <h3>Hundru Falls</h3>
+      <p>One of the highest waterfalls in India, cascading from 320 feet.</p>
+    </div>
+
+    <div class="place-card">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTP_u5Go0NW-sSi1x_XcWEJfc_42vo_nzM6iQ&s" alt="Patratu Valley">
+      <h3>Patratu Valley</h3>
+      <p>Scenic drive with winding roads, green hills, and the beautiful Patratu Dam.</p>
+    </div>
+
+    <div class="place-card">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAZZG9O02XlLmJzjJkCQhSY0lVTlccN8tDfw&s" alt="Deoghar Baidyanath Dham">
+      <h3>Deoghar (Baidyanath Dham)</h3>
+      <p>One of the 12 Jyotirlingas, a major pilgrimage site for devotees.</p>
+    </div>
+
+    <div class="place-card">
+      <img src="https://travelsetu.com/apps/uploads/new_destinations_photos/destination/2024/01/08/29f3c25f9140c0d9c1bce45348cd0dd8_1000x1000.jpg" alt="Dassam Falls">
+      <h3>Dassam Falls</h3>
+      <p>Gushing waterfalls surrounded by dense forests, perfect for adventure lovers.</p>
+    </div>
+  </section>
+
+  <!-- Full Background Video Section -->
+  <section class="video-section">
+    <video autoplay loop controls>
+      <source src="videos/jharkhand.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </section>
+
+  <!-- Back Home -->
+  <div class="back-home">
+    <a href="index.html">⬅ Back to Home</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>  <html lang="en">  
+<head>  
+  <meta charset="UTF-8">  
+  <title>Jharkhand Chatbot</title>  
+  <style>
+    :root{
+          --accent:#2e7d32;
+          --bg:#f4f4f9;
+          --panel:#ffffff;
+          --muted:#f1f3f5;
+          --text:#222;
+        }
+        html,body{height:100%;margin:0;font-family:Inter, Arial, sans-serif;background:var(--bg);color:var(--text)}
+        /* full page chatbot container */
+        .chatbot{
+          position:fixed;inset:0;display:flex;flex-direction:column;background:var(--panel);
+          box-shadow:0 6px 30px rgba(17,24,39,0.12);overflow:hidden
+        }
+        .chatbot-header{
+          background:linear-gradient(90deg,var(--accent),#1b5e20);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:12px
+        }
+        .chatbot-title{font-weight:700;font-size:18px}
+        .chatbot-sub{opacity:0.9;font-size:13px}
+        .chat-controls{margin-left:auto;display:flex;gap:8px;align-items:center}
+        .lang-select, .voice-select{padding:6px;border-radius:6px;border:1px solid #e6e6e6;background:#fff;font-size:13px}
+        .chatbot-main{display:flex;flex:1;min-height:0}
+        .chatbot-messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:10px;background:linear-gradient(180deg, #fafafa, #fff)}
+        .chatbot-messages .bubble{max-width:75%;padding:10px 12px;border-radius:12px;font-size:15px;line-height:1.4}
+        .bubble.bot{background:var(--muted);align-self:flex-start}
+        .bubble.user{background:linear-gradient(90deg,#c8e6c9,#b2dfbb);align-self:flex-end}
+        .chatbot-input{display:flex;padding:12px;border-top:1px solid #eee;gap:8px;background:#fff}
+        .chatbot-input input{flex:1;padding:12px 14px;border-radius:10px;border:1px solid #e6e6e6;font-size:15px}
+        .chatbot-input button{background:var(--accent);color:#fff;border:none;padding:10px 16px;border-radius:10px;cursor:pointer}
+        .meta-note{font-size:12px;color:#666;margin-left:6px}
+
+        /* Responsive */
+        @media (max-width:720px){
+          .chatbot-header{padding:12px}
+          .chatbot-title{font-size:16px}
+          .chatbot-input input{font-size:14px}
+        }
+      </style>
+    </head>
+    <body>
+      <div class="chatbot" role="application" aria-label="Jharkhand Chatbot">
+        <div class="chatbot-header">
+          <div>
+            <div class="chatbot-title">Jharkhand Chatbot 🌐</div>
+            <div class="chatbot-sub">Ask about places, culture, food and wildlife</div>
+          </div>
+          <div class="chat-controls">
+            <select id="lang" class="lang-select" aria-label="Language selector">
+              <option value="en-IN">English</option>
+              <option value="hi-IN">Hindi</option>
+              <option value="bn-IN">Bengali</option>
+              <option value="or-IN">Odia</option>
+              <option value="mr-IN">Marathi</option>
+              <option value="ta-IN">Tamil</option>
+            </select>
+            <select id="voice" class="voice-select" aria-label="Voice selector">
+              <option value="">(default voice)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="chatbot-main">
+          <div class="chatbot-messages" id="messages" aria-live="polite" aria-atomic="false"></div>
+        </div>
+
+        <div class="chatbot-input">
+          <input type="text" id="userInput" placeholder="Type a question about Jharkhand and press Enter..." aria-label="Message input">
+          <button id="sendBtn">Send</button>
+        </div>
+      </div>
+
+      <script>
+        document.addEventListener('DOMContentLoaded', ()=>{
+          const messages = document.getElementById('messages');
+          const userInput = document.getElementById('userInput');
+          const langSelect = document.getElementById('lang');
+          const voiceSelect = document.getElementById('voice');
+          const sendBtn = document.getElementById('sendBtn');
+
+          // Knowledge base (expandable)
+          const info = {
+            en: { intro: "Jharkhand is a mineral-rich state in eastern India, full of forests, waterfalls, and tribal heritage. Famous places: Netarhat, Patratu, Hundru Falls, Betla National Park, Deoghar.", culture: "Jharkhand is famous for tribal festivals like Sarhul, Karma, Sohrai, and dances like Chhau. Handicrafts and folk music are integral.", food: "Popular dishes: Thekua, Dhuska, Rugra curry, Chilka roti, Handia (rice beer).", economy: "Jharkhand is known as the ‘Land of Forests and Minerals’. It produces coal, iron, copper, bauxite, and mica. Industries: steel, power, textiles.", wildlife: "Important wildlife areas: Betla National Park, Dalma Wildlife Sanctuary, Hazaribagh Wildlife Sanctuary with elephants, tigers, and deer." },
+            hi: { intro: "झारखंड खनिज संपदा से भरपूर पूर्वी भारत का राज्य है, जो जंगलों, झरनों और आदिवासी संस्कृति के लिए प्रसिद्ध है। प्रमुख स्थल: नेतरहाट, पतरातु, हुंडरू जलप्रपात, बेटला राष्ट्रीय उद्यान, देवघर।", culture: "झारखंड सरहुल, करमा, सोहराय जैसे त्योहारों और छऊ नृत्य, हस्तशिल्प और लोक संगीत के लिए प्रसिद्ध है।", food: "प्रसिद्ध व्यंजन: ठेकुआ, धुसका, रुगरु सब्ज़ी, चिलका रोटी, हांडिया (चावल की बीयर)।", economy: "झारखंड को 'जंगल और खनिजों की भूमि' कहा जाता है। यह कोयला, लोहा, तांबा, बाक्साइट और अभ्रक का प्रमुख उत्पादक है। इस्पात, ऊर्जा और वस्त्र उद्योग महत्वपूर्ण हैं।", wildlife: "मुख्य वन्यजीव क्षेत्र: बेटला राष्ट्रीय उद्यान, दलमा अभयारण्य, हजारीबाग अभयारण्य – हाथी, बाघ और हिरण पाए जाते हैं।" },
+            bn: { intro: "ঝাড়খণ্ড পূর্ব ভারতের একটি খনিজ সমৃদ্ধ রাজ্য, যেখানে অরণ্য, জলপ্রপাত এবং আদিবাসী সংস্কৃতি রয়েছে। বিখ্যাত স্থান: নেতারহাট, পাত্রাতু, হুন্দ্রু জলপ্রপাত, বেতলা ন্যাশনাল পার্ক, দেওঘর।", culture: "ঝাড়খণ্ড সরহুল, করম, সোহারাই উৎসব এবং ছৌ নৃত্য, হস্তশিল্প ও লোকসঙ্গীতের জন্য বিখ্যাত।", food: "জনপ্রিয় খাবার: থেকুয়া, ধুসকা, রুগরা তরকারি, চিলকা রুটি, হাঁড়িয়া।", economy: "ঝাড়খণ্ডকে 'অরণ্য ও খনিজের ভূমি' বলা হয়। এটি কয়লা, লোহা, তামা, বক্সাইট ও মিকা উৎপাদনে সমৃদ্ধ। ইস্পাত, বিদ্যুৎ, বস্ত্র শিল্প গুরুত্বপূর্ণ।", wildlife: "বেতলা ন্যাশনাল পার্ক, দালমা অভয়ারণ্য, হাজারীবাগ অভয়ারণ্যে হাতি, বাঘ, হরিণ পাওয়া যায়।" },
+            or: { intro: "ଝାରଖଣ୍ଡ ପୂର୍ବ ଭାରତର ଏକ ଖଣିଜ ସମୃଦ୍ଧ ରାଜ୍ୟ, ଯେଉଁଠାରେ ଜଙ୍ଗଲ, ପ୍ରପାତ ଏବଂ ଆଦିବାସୀ ସଂସ୍କୃତି ରହିଛି। ପ୍ରସିଦ୍ଧ ସ୍ଥାନ: ନେତରହାଟ, ପତ୍ରାଟୁ, ହୁଣ୍ଡ୍ରୁ ପ୍ରପାତ, ବେଟଲା ନ୍ୟାସନାଲ ପାର୍କ, ଦେଓଘର।", culture: "ଝାରଖଣ୍ଡ ସରହୁଲ, କର୍ମା, ସୋହରାଇ ପର୍ବ, ଛୌ ନୃତ୍ୟ, ହସ୍ତଶିଳ୍ପ ଏବଂ ଲୋକସଙ୍ଗୀତ ପାଇଁ ପ୍ରସିଦ୍ଧ।", food: "ପ୍ରସିଦ୍ଧ ଖାଦ୍ୟ: ଠେକୁଆ, ଧୁସ୍କା, ରୁଗ୍ରା ତରକାରି, ଚିଲ୍କା ରୋଟି, ହାଣ୍ଡିଆ।" },
+            mr: { intro: "झारखंड हा पूर्व भारतातील खनिजसमृद्ध राज्य आहे. येथे जंगल, धबधबे आणि आदिवासी संस्कृती आढळते. प्रमुख ठिकाणे: नेतरहाट, पतरातु, हुंडरू धबधबा, बेटला राष्ट्रीय उद्यान, देवघर।", culture: "झारखंड सरहुल, करमा, सोहराय उत्सव, छऊ नृत्य आणि लोककला साठी प्रसिद्ध आहे।", food: "लोकप्रिय खाद्यपदार्थ: ठेकुआ, धुसका, रुगरा भाजी, चिलका रोटी, हांडिया।" },
+            ta: { intro: "ஜார்கண்ட் இந்தியாவின் கிழக்குப் பகுதியில் உள்ள ஒரு கனிமச் செல்வமிக்க மாநிலம். இது காடுகள், அருவிகள் மற்றும் பழங்குடியினர் கலாச்சாரம் கொண்டது. புகழ்பெற்ற இடங்கள்: நெடர்ஹாட், பாத்ராட்டு, ஹுண்ட்ரு அருவி, பெட்லா தேசிய பூங்கா, தேவகர்.", culture: "ஜார்கண்ட் சர்ஹுல், கர்மா, சொஹரை போன்ற திருவிழாக்கள் மற்றும் சௌ நடனம், கைவினைப் பொருட்கள், நாட்டுப்புற இசைக்காக பிரபலமானது.", food: "பிரபலமான உணவுகள்: தெகுவா, துஸ்கா, ருக்ரா கறி, சில்கா ரொட்டி, ஹாண்டியா." }
+          };
+
+          // populate available voices in the selector
+          function populateVoices(){
+            const voices = speechSynthesis.getVoices() || [];
+            // clear but keep default option
+            const selected = voiceSelect.value;
+            voiceSelect.innerHTML = '<option value="">(default voice)</option>';
+            voices.forEach(v=>{
+              try{
+                const opt = document.createElement('option');
+                opt.value = v.name + '||' + v.lang;
+                opt.textContent = v.name + ' ('+v.lang+')';
+                voiceSelect.appendChild(opt);
+              }catch(e){/*ignore malformed voice*/}
+            });
+            // restore selection if possible
+            if(selected) voiceSelect.value = selected;
+          }
+
+          speechSynthesis.onvoiceschanged = populateVoices;
+          // try to populate now (some browsers populate asynchronously)
+          populateVoices();
+
+          function speak(text){
+            if(!('speechSynthesis' in window)) return; // unsupported
+            const utter = new SpeechSynthesisUtterance(text);
+            const lang = langSelect.value || 'en-IN';
+            utter.lang = lang;
+            const selectedVoice = voiceSelect.value;
+            if(selectedVoice){
+              const [name, vlang] = selectedVoice.split('||');
+              const match = speechSynthesis.getVoices().find(v=>v.name===name && v.lang===vlang);
+              if(match) utter.voice = match;
+            } else {
+              // try to find voice by language prefix
+              const pref = lang.split('-')[0];
+              const match = speechSynthesis.getVoices().find(v=>v.lang && v.lang.startsWith(pref));
+              if(match) utter.voice = match;
+            }
+            try{ speechSynthesis.cancel(); speechSynthesis.speak(utter); }catch(e){/*ignore errors*/}
+          }
+
+          function addMessage(text, sender){
+            const div = document.createElement('div');
+            div.className = 'bubble ' + (sender==='user' ? 'user' : 'bot');
+            div.textContent = text;
+            messages.appendChild(div);
+            // small delay ensures rendering before scroll
+            requestAnimationFrame(()=>{ messages.scrollTop = messages.scrollHeight; });
+          }
+
+          function detectLangCode(){
+            const v = langSelect.value || 'en-IN';
+            if(v.startsWith('hi')) return 'hi';
+            if(v.startsWith('bn')) return 'bn';
+            if(v.startsWith('or')) return 'or';
+            if(v.startsWith('mr')) return 'mr';
+            if(v.startsWith('ta')) return 'ta';
+            return 'en';
+          }
+
+          function generateReply(text){
+            const lang = detectLangCode();
+            let reply = (info[lang] && info[lang].intro) || info.en.intro;
+            if(/culture|संस्कृति|সংস্কৃতি|ସଂସ୍କୃତି|संस्कृती|கலாச்சாரம்/i.test(text)) reply = info[lang].culture || reply;
+            else if(/food|भोजन|খাবার|ଖାଦ୍ୟ|अन्न|உணவு/i.test(text)) reply = info[lang].food || reply;
+            else if(/economy|अर्थव्यवस्था|অর্থনীতি|अर्थ/i.test(text)) reply = (info[lang].economy || info[lang].intro || reply);
+            else if(/wildlife|वन्यजीव|বন্যপ্রাণী|ପ୍ରାଣୀ/i.test(text)) reply = (info[lang].wildlife || info[lang].intro || reply);
+            return reply;
+          }
+
+          function sendMessage(){
+            const text = userInput.value.trim();
+            if(!text) return;
+            addMessage(text,'user');
+            const reply = generateReply(text);
+            // small simulated delay for bot response
+            setTimeout(()=>{ addMessage(reply,'bot'); speak(reply); }, 350);
+            userInput.value='';
+            userInput.focus();
+          }
+
+          // keyboard: Enter to send
+          userInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); sendMessage(); } });
+          sendBtn.addEventListener('click', sendMessage);
+
+          // initial greeting
+          setTimeout(()=>{ addMessage('Hello! I can tell you about Jharkhand — try asking about culture, food, wildlife, or economy.', 'bot'); }, 250);
+        });
+      </script>
+    </body>
+    </html>

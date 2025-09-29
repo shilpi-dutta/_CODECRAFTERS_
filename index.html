@@ -1,0 +1,1302 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Johar Jharkhand</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* --- General Styles --- */
+        :root {
+            --primary-color: #ff9800; /* Orange/Gold for Jharkhand */
+            --secondary-color: #4CAF50; /* Green for nature */
+            --dark-bg: #1f1f1f;
+            --light-text: #ffffff;
+            --card-bg: #2a2a2a;
+            --font-family: 'Poppins', sans-serif;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: #0d0d0d;
+            color: #ccc;
+        }
+
+        /* --- Header & Nav --- */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 50px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .brand {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            letter-spacing: 1px;
+        }
+
+        nav a {
+            color: var(--light-text);
+            text-decoration: none;
+            margin-left: 25px;
+            font-weight: 500;
+            transition: color 0.3s, transform 0.2s;
+            position: relative;
+            padding-bottom: 5px;
+        }
+
+        nav a:hover {
+            color: var(--primary-color);
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            left: 0;
+            bottom: 0;
+            transition: width 0.3s;
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        .dashlink {
+            background-color: var(--secondary-color);
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin-left: 35px;
+            transition: background-color 0.3s;
+        }
+
+        .dashlink:hover {
+            background-color: #388e3c;
+            color: var(--light-text);
+        }
+        
+        /* --- Video Background & Overlay --- */
+        #bg-video {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -2;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding-top: 60px;
+        }
+
+        .hero h1 {
+            font-size: 4.5rem;
+            color: var(--light-text);
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+
+        .hero h1 span {
+            color: var(--primary-color);
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            color: #ddd;
+            margin-bottom: 40px;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 15px;
+            width: 80%;
+            max-width: 800px;
+        }
+
+        #searchInput {
+            flex-grow: 1;
+            padding: 15px 20px;
+            border-radius: 30px;
+            border: none;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: box-shadow 0.3s;
+        }
+
+        #searchInput:focus {
+            outline: none;
+            box-shadow: 0 6px 15px rgba(255, 152, 0, 0.5);
+        }
+
+        .hero-actions button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .hero-actions button:nth-child(2) { /* Explore Map */
+            background-color: var(--primary-color);
+            color: var(--dark-bg);
+        }
+
+        .hero-actions button:nth-child(2):hover {
+            background-color: #ffb74d;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.5);
+        }
+
+        .hero-actions button:nth-child(3) { /* Chat */
+            background-color: var(--secondary-color);
+            color: var(--light-text);
+        }
+
+        .hero-actions button:nth-child(3):hover {
+            background-color: #66bb6a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.5);
+        }
+
+        /* --- Section Panels --- */
+        .panel {
+            padding: 80px 50px;
+            background-color: var(--dark-bg);
+            margin: 0 auto;
+            max-width: 1400px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .panel h2 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .cols {
+            display: flex;
+            gap: 30px;
+        }
+
+        .mapbox {
+            height: 500px;
+            flex: 2;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            border: 3px solid var(--secondary-color);
+        }
+
+        .side {
+            flex: 1;
+        }
+
+        .side h3 {
+            color: var(--light-text);
+            margin-bottom: 10px;
+        }
+
+        .side p {
+            margin-bottom: 15px;
+            color: #aaa;
+        }
+        
+        /* A-Frame 360 viewer style */
+        a-scene {
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            background: #2a2a2a !important;
+        }
+
+        /* --- Forms & Inputs --- */
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-end;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: flex;
+            flex-direction: column;
+            color: #ddd;
+            font-weight: 500;
+        }
+
+        input[type="number"], input[type="text"], input, textarea, select {
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background: #333;
+            color: var(--light-text);
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: 2px solid var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        select[multiple] {
+            height: 120px;
+        }
+
+        button[type="submit"], button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            background-color: var(--primary-color);
+            color: var(--dark-bg);
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #ffb74d;
+            transform: translateY(-1px);
+        }
+
+        .resultBox {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            white-space: pre-wrap;
+            min-height: 100px;
+            overflow-x: auto;
+            border-left: 3px solid var(--secondary-color);
+            color: #eee;
+        }
+
+        /* --- Itinerary Planner Styling --- */
+        #itResult {
+            padding: 0;
+            background: none;
+            border: none;
+        }
+
+        .itinerary-card {
+            background: var(--card-bg);
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .itinerary-card h3 {
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #444;
+            padding-bottom: 5px;
+        }
+
+        .itinerary-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .itinerary-card ul li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+            color: #ccc;
+        }
+
+        .itinerary-card ul li::before {
+            content: '🗺';
+            position: absolute;
+            left: 0;
+            color: var(--primary-color);
+        }
+
+        /* --- Marketplace Styling --- */
+        .market-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .product-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s;
+            border-top: 4px solid var(--primary-color);
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-card h4 {
+            color: var(--light-text);
+            margin-bottom: 5px;
+            font-size: 1.2rem;
+        }
+
+        .product-card p {
+            margin: 5px 0;
+        }
+
+        .product-card .price {
+            font-size: 1.4rem;
+            color: var(--secondary-color);
+            font-weight: 700;
+        }
+        
+        /* Marketplace form */
+        #marketForm input {
+            flex-grow: 1;
+        }
+        
+        #marketForm button {
+            flex-shrink: 0;
+            align-self: flex-end;
+        }
+        
+        /* --- Guides/Blockchain Styling --- */
+        .adminActions button {
+            background-color: #3f51b5; /* Blue for admin */
+            color: var(--light-text);
+            margin-right: 15px;
+        }
+        
+        .adminActions button:hover {
+            background-color: #7986cb;
+        }
+
+        #guidesList {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .guide-item {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3f51b5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .guide-item span {
+            font-weight: 600;
+        }
+
+        .guide-item .verified {
+            color: var(--secondary-color);
+            font-weight: 700;
+        }
+
+        .guide-item .unverified {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+        
+        /* --- Transport Styling --- */
+        #transportArea {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .transport-item {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .transport-item strong {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+        
+        .transport-item .eta {
+            color: var(--light-text);
+            font-weight: 600;
+        }
+
+        /* --- Feedback Styling --- */
+        #feedbackText {
+            width: 100%;
+            min-height: 150px;
+            margin-bottom: 20px;
+        }
+
+        #sentimentResult {
+            margin-top: 20px;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            color: #ddd;
+            border-left: 3px solid #f44336; /* Red for neutral/placeholder */
+        }
+        
+        .sentiment-positive {
+            border-left: 3px solid var(--secondary-color) !important;
+            color: var(--secondary-color);
+        }
+
+        /* --- Chatbot UI --- */
+        #chatIcon {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            font-size: 2rem;
+            background: var(--primary-color);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.6);
+            z-index: 1001;
+            transition: transform 0.3s;
+        }
+        
+        #chatIcon:hover {
+            transform: scale(1.1);
+        }
+
+        .chatWindow {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 350px;
+            height: 500px;
+            background: #222;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            z-index: 1002;
+            overflow: hidden;
+        }
+
+        .chatHeader {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: var(--dark-bg);
+            border-bottom: 2px solid var(--primary-color);
+            color: var(--light-text);
+            font-weight: 600;
+        }
+        
+        .chatHeader select {
+            padding: 5px;
+            border: none;
+            background: #333;
+            color: var(--light-text);
+            margin-right: 10px;
+        }
+
+        .chatHeader button {
+            background: none;
+            color: var(--light-text);
+            font-size: 1.2rem;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .chatHeader button:hover {
+            color: #f44336;
+        }
+
+        .chatLog {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #2a2a2a;
+        }
+
+        .chatInput {
+            display: flex;
+            padding: 10px;
+            background: #333;
+        }
+
+        .chatInput input {
+            flex-grow: 1;
+            border-radius: 20px;
+            padding: 10px 15px;
+            border: none;
+            background: #444;
+            margin-right: 5px;
+        }
+
+        .chatInput button {
+            padding: 10px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 3px;
+        }
+        
+        .chatInput button:nth-child(2) { /* Send button */
+             background-color: var(--primary-color);
+        }
+
+        .chat-message {
+            max-width: 80%;
+            padding: 10px;
+            border-radius: 15px;
+            line-height: 1.4;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background: var(--primary-color);
+            color: var(--dark-bg);
+            border-bottom-right-radius: 0;
+        }
+
+        .assistant-message {
+            align-self: flex-start;
+            background: var(--secondary-color);
+            color: var(--light-text);
+            border-bottom-left-radius: 0;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* --- Footer Styles (Copied from HTML but needed here for completeness) --- */
+        footer {    
+          background-color: #1f1f1f;    
+          color: #fff;    
+          padding: 50px 20px 20px 20px;    
+          font-family: var(--font-family);    
+        }    
+        
+        .footer-container {    
+          display: flex;    
+          flex-wrap: wrap;    
+          justify-content: space-between;    
+          gap: 30px;    
+          max-width: 1200px;    
+          margin: auto;    
+        }    
+        
+        .footer-about, .footer-links, .footer-contact {    
+          flex: 1;    
+          min-width: 250px;    
+        }    
+        
+        .footer-about h3, .footer-links h4, .footer-contact h4 {    
+          margin-bottom: 15px;    
+          color: var(--primary-color);    
+        }    
+        
+        .footer-links ul {    
+          list-style: none;    
+          padding: 0;    
+        }    
+        
+        .footer-links ul li {    
+          margin-bottom: 10px;    
+        }    
+        
+        .footer-links ul li a {    
+          text-decoration: none;    
+          color: #fff;    
+          transition: color 0.3s;    
+        }    
+        
+        .footer-links ul li a:hover {    
+          color: var(--primary-color);    
+        }    
+        
+        .footer-contact p {    
+          margin: 5px 0;    
+        }    
+        
+        .social-icons {    
+          margin-top: 15px;    
+        }    
+        
+        .social-icons a {    
+          display: inline-block;    
+          margin-right: 10px;    
+        }    
+        
+        .social-icons img {    
+          width: 24px;    
+          height: 24px;    
+          /* Invert filter is not ideal with specific images, but keep for simulation */
+          /* filter: invert(1); */
+          transition: transform 0.3s;
+          border-radius: 4px;
+        }    
+        
+        .social-icons a:hover img {    
+          transform: scale(1.1);
+          box-shadow: 0 0 5px var(--primary-color);
+        }    
+        
+        .footer-bottom {    
+          text-align: center;    
+          margin-top: 30px;    
+          border-top: 1px solid #444;    
+          padding-top: 15px;    
+          font-size: 14px;    
+          color: #ccc;    
+        }    
+        
+        @media (max-width: 768px) {    
+          .footer-container {    
+            flex-direction: column;    
+            text-align: center;    
+          }    
+          .footer-links ul {    
+            display: inline-block;    
+          }
+          .cols {
+              flex-direction: column;
+          }
+          .hero h1 {
+              font-size: 3rem;
+          }
+          .hero-actions {
+              flex-direction: column;
+              align-items: stretch;
+          }
+          .hero-actions button {
+              margin: 0;
+          }
+        }
+    </style>
+</head>
+<body>
+    <video id="bg-video" autoplay muted loop>
+        <source src="videos/jharkhand.mp4" type="video/mp4">
+        </video>
+    
+    <div class="overlay">
+        <header>
+            <div class="brand">Johar Jharkhand</div>
+            <nav>
+                <a href="#mapSection">Explore</a>
+                <a href="track&calendar.html">Tracker and Calendar</a>
+                <a href="Destinations.html">Destinations</a>
+                <a href="#planner">Planner</a>
+                <a href="#market">Marketplace</a>
+                <a href="#guides">Guides</a>
+                <a href="chatbot.html">Chatbot</a>
+                <a href="signin.html">Sign In</a>
+                <a href="dashboard.html" class="dashlink">Dashboard</a>
+                
+            </nav>
+        </header>
+        
+        <main>
+            <section class="hero" id="hero">
+                <h1>Discover the <span>Heart of Jharkhand</span></h1>
+                <p>AI-style itinerary planner • Multilingual speaking chatbot • Local marketplace • Verified guides</p>
+                <div class="hero-actions">
+                    <input id="searchInput" placeholder="Search places, waterfalls, culture..." />
+                    <button onclick="scrollToSection('mapSection')">Explore Map</button>
+                    <button onclick="openChat()">Chat with Assistant</button>
+                </div>
+            </section>
+            
+            <section id="mapSection" class="panel">
+                <h2>Interactive Map & AR/VR Previews</h2>
+                <div class="cols">
+                    <div id="map" class="mapbox"></div>
+                    <div class="side">
+                        <h3>AR/VR Preview (360° View)</h3>
+                        <p>Click a marker on the map to load its simulated 360° preview below. Use your mouse to look around!</p>
+                        <a-scene embedded style="width:100%; height:300px;">
+                            <a-sky id="ar-sky" src="https://i.imgur.com/8Qj8jYI.jpeg" rotation="0 -90 0"></a-sky>
+                            <a-camera position="0 0 0" wasd-controls-enabled="false">
+                                <a-cursor></a-cursor>
+                            </a-camera>
+                            <a-text id="ar-text" value="Click a map marker to load a location!" color="#FF9800" align="center" position="0 1.5 -2" scale="1 1 1"></a-text>
+                        </a-scene>
+                    </div>
+                </div>
+            </section>
+            
+            
+            <section id="planner" class="panel">
+                <h2>AI-style Personalized Itinerary Planner 🤖✨</h2>
+                <form id="itForm" onsubmit="generateItinerary(event)">
+                    <label>Days: <input type="number" id="days" min="1" max="14" value="3"/></label>
+                    <label>Interests:     
+                        <select id="interests" multiple>
+                            <option value="waterfalls" selected>Waterfalls 💧</option>
+                            <option value="wildlife">Wildlife 🐅</option>
+                            <option value="culture">Tribal Culture 🎨</option>
+                            <option value="trekking">Trekking ⛰</option>
+                            <option value="relax">Relaxation & Scenic Views 🧘</option>
+                        </select>
+                    </label>
+                    <label>Language:     
+                        <select id="itLang">
+                            <option value="en-IN">English</option>
+                            <option value="hi-IN">Hindi (हिंदी)</option>
+                            <option value="bn-IN">Bengali (বাংলা)</option>
+                        </select>
+                    </label>
+                    <button type="submit">Generate Itinerary</button>
+                </form>
+                <div id="itResult" class="resultBox">
+                    <p>Your AI-generated, personalized itinerary will appear here in a beautiful format.</p>
+                </div>
+            </section>
+            
+            <section id="market" class="panel">
+                <h2>Local Marketplace 🛍💎</h2>
+                <div class="market-grid" id="marketGrid">
+                    </div>
+                <h3>Add a New Product</h3>
+                <form id="marketForm" onsubmit="addMarketItem(event)">
+                    <input id="mTitle" placeholder="Product title (e.g., Dokra Art)" required/>
+                    <input id="mPrice" placeholder="Price (₹)" type="number" min="1" required/>
+                    <input id="mSeller" placeholder="Seller name (e.g., Local Artisan Co.)" required/>
+                    <button>Add Product</button>
+                </form>
+            </section>
+            
+            <section id="guides" class="panel">
+                <h2>Guide Registry (Simulated Blockchain) 🛡</h2>
+                <p>Register a guide, verify (admin), and issue certificate — all simulated locally to showcase a verified network.</p>
+                <form id="guideForm" onsubmit="registerGuide(event)">
+                    <input id="gName" placeholder="Guide name" required />
+                    <input id="gLocation" placeholder="Primary location (e.g., Ranchi)" />
+                    <button>Register Guide</button>
+                </form>
+                <div id="guidesList">
+                    </div>
+                <div class="adminActions">
+                    <button onclick="adminVerifyAll()">Admin: Verify All</button>
+                    <button onclick="issueCertificates()">Issue Certificates</button>
+                </div>
+            </section>
+            
+            <section id="transport" class="panel">
+                <h2>Real-time Transport & Location 📍🚌</h2>
+                <p>Simulated real-time vehicle tracking with mock ETAs. See your next bus/cab arrival!</p>
+                <button onclick="shareLocation()">Share My Location</button>
+                <div id="transportArea">
+                    </div>
+            </section>
+            
+            <section id="feedback" class="panel">
+                <h2>Feedback & Sentiment Analysis 💬📊</h2>
+                <p>Write a review, and see a real-time (simulated) sentiment score!</p>
+                <textarea id="feedbackText" placeholder="Leave feedback about your trip, a guide, or a location..."></textarea>
+                <button onclick="sendFeedback()">Send Feedback & Analyze</button>
+                <div id="sentimentResult">Awaiting feedback...</div>
+            </section>
+            
+            <div id="chatIcon" title="Open Chatbot">💬</div>
+            
+            <div id="chatWindow" class="chatWindow hidden">
+                <div class="chatHeader">
+                    <div>Jharkhand Assistant</div>
+                    <div>
+                        <select id="ttsLang" onchange="changeTTSlang()">
+                            <option value="en-IN">English (en-IN)</option>
+                            <option value="hi-IN">Hindi (hi-IN)</option>
+                            <option value="bn-IN">Bengali (bn-IN)</option>
+                            <option value="ta-IN">Tamil (ta-IN)</option>
+                            <option value="te-IN">Telugu (te-IN)</option>
+                            <option value="mr-IN">Marathi (mr-IN)</option>
+                            <option value="gu-IN">Gujarati (gu-IN)</option>
+                            <option value="kn-IN">Kannada (kn-IN)</option>
+                            <option value="ml-IN">Malayalam (ml-IN)</option>
+                            <option value="pa-IN">Punjabi (pa-IN)</option>
+                            <option value="ur-IN">Urdu (ur-IN)</option>
+                        </select>
+                        <button onclick="closeChat()">✖</button>
+                    </div>
+                </div>
+                <div id="chatLog" class="chatLog"></div>
+                <div class="chatInput">
+                    <input id="chatInput" placeholder="Ask anything about Jharkhand..." />
+                    <button onclick="sendChat()">Send</button>
+                    <button onclick="speakLast()">🔊</button>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <div class="footer-container">
+                <div class="footer-about">
+                    <h3>Explore Jharkhand</h3>
+                    <p>Discover the natural beauty, tribal culture, historical landmarks, and eco-tourism hotspots of Jharkhand. Plan your personalized itinerary, interact with our AI guide, and explore local experiences.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#hero">Home</a></li>
+                        <li><a href="#planner">Itinerary Planner</a></li>
+                        <li><a href="#mapSection">Interactive Map</a></li>
+                        <li><a href="#market">Local Marketplace</a></li>
+                        <li><a href="#feedback">Feedback</a></li>
+                        <li><a href="#guides">Guides</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h4>Contact Us</h4>
+                    <p>Email: support@jharkhandtourism.ai</p>
+                    <p>Phone: +91 98765 43210</p>
+                    <p>Address: Tourism Office, Ranchi, Jharkhand, India</p>
+                    <div class="social-icons">
+                        <a href="#"><img src="https://static.vecteezy.com/system/resources/thumbnails/018/930/698/small/facebook-logo-facebook-icon-transparent-free-png.png" alt="Facebook"></a>
+                        <a href="#"><img src="https://cdn4.iconfinder.com/data/icons/flat-brand-logo-2/512/twitter-512.png" alt="Twitter"></a>
+                        <a href="#"><img src="https://img.freepik.com/premium-vector/instagram-vector-logo-icon-social-media-logotype_901408-392.jpg?semt=ais_hybrid&w=740&q=80" alt="Instagram"></a>
+                        <a href="#"><img src="https://static.vecteezy.com/system/resources/previews/018/930/480/non_2x/linkedin-logo-linkedin-icon-transparent-free-png.png" alt="LinkedIn"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Explore Jharkhand. All rights reserved. | Designed with ❤ using AI.</p>
+            </div>
+        </footer>
+    </div>
+    
+    <script>
+        // --- Global State ---
+        let map;
+        let guides = [
+            { id: 1, name: "Suresh Mahto", location: "Ranchi", verified: true, certificate: true },
+            { id: 2, name: "Priya Oraon", location: "Netarhat", verified: false, certificate: false }
+        ];
+        let products = [
+            { title: "Tussar Silk Saree", price: 3500, seller: "Khadi Gramodyog" },
+            { title: "Dokra Art Horse", price: 1200, seller: "Local Artisan Co." },
+            { title: "Lacquer Bangles Set", price: 450, seller: "Tribal Handicrafts" }
+        ];
+        let transportVehicles = [
+            { id: 1, type: "Bus (Ranchi-Jamshedpur)", distance: 5, eta: 7, icon: '🚌' },
+            { id: 2, type: "Cab (Local)", distance: 1.2, eta: 3, icon: '🚕' },
+            { id: 3, type: "Auto (Local)", distance: 0.5, eta: 1, icon: '🛺' }
+        ];
+        let lastAssistantMessage = "";
+        
+        const JHARKHAND_PLACES = [
+            { lat: 23.3441, lon: 85.3096, name: "Ranchi (Tagore Hill)", ar_img: "https://i.imgur.com/2s3Fh3b.jpeg" }, // Nature/Urban (Placeholder Image)
+            { lat: 23.3075, lon: 85.3411, name: "Hundru Falls", ar_img: "https://i.imgur.com/8Qj8jYI.jpeg" }, // Waterfall (Placeholder Image)
+            { lat: 23.4700, lon: 84.0700, name: "Betla National Park", ar_img: "https://i.imgur.com/gK2i8J8.jpeg" }, // Wildlife (Placeholder Image)
+            { lat: 23.5800, lon: 85.9000, name: "Parasnath Hill", ar_img: "https://i.imgur.com/0v5k2fP.jpeg" } // Trekking/Pilgrimage (Placeholder Image)
+        ];
+
+        // --- Utility Functions ---
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function getArImage(placeName) {
+            const place = JHARKHAND_PLACES.find(p => p.name === placeName);
+            return place ? place.ar_img : "https://i.imgur.com/8Qj8jYI.jpeg"; // Default fallback
+        }
+
+        // --- Map Functions (Leaflet) ---
+        function initializeMap() {
+            if (!document.getElementById('map')) return;
+
+            map = L.map('map').setView([23.63, 85.28], 8); // Center near Jharkhand
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            JHARKHAND_PLACES.forEach(place => {
+                const marker = L.marker([place.lat, place.lon], { draggable: true }).addTo(map)
+                    .bindPopup(`<b>${place.name}</b><br>Click to load AR preview.`);
+
+                marker.on('click', () => {
+                    loadARPreview(place.name, getArImage(place.name));
+                });
+            });
+            
+            // Set initial AR preview
+            loadARPreview(JHARKHAND_PLACES[0].name, JHARKHAND_PLACES[0].ar_img);
+        }
+
+        // --- AR/VR Functions (A-Frame Simulation) ---
+        function loadARPreview(placeName, imageUrl) {
+            const arSky = document.getElementById('ar-sky');
+            const arText = document.getElementById('ar-text');
+            
+            if (arSky) {
+                arSky.setAttribute('src', imageUrl);
+            }
+            if (arText) {
+                arText.setAttribute('value', `360° View of:\n${placeName}`);
+                arText.setAttribute('color', '#FF9800');
+            }
+        }
+
+        // --- Itinerary Planner (Simulated AI) ---
+        function generateItinerary(event) {
+            event.preventDefault();
+            const days = document.getElementById('days').value;
+            const interestsSelect = document.getElementById('interests');
+            const selectedInterests = Array.from(interestsSelect.options).filter(opt => opt.selected).map(opt => opt.value).join(', ');
+            const lang = document.getElementById('itLang').value;
+            const resultBox = document.getElementById('itResult');
+
+            resultBox.innerHTML = `
+                <div class="itinerary-card">
+                    <h3>Day 1: Waterfalls & Scenery 🏞</h3>
+                    <ul>
+                        <li>Morning: Arrive at Ranchi, transfer to hotel.</li>
+                        <li>Afternoon: Visit Hundru Falls (The Niagara of Jharkhand).</li>
+                        <li>Evening: Relax at a viewpoint near Kanke Dam.</li>
+                    </ul>
+                </div>
+                <div class="itinerary-card">
+                    <h3>Day 2: Culture & Wildlife 🐅🎨</h3>
+                    <ul>
+                        <li>Morning: Drive to Betla National Park. Go for a morning jungle safari.</li>
+                        <li>Afternoon: Explore the nearby Palamu Fort ruins.</li>
+                        <li>Evening: Attend a local cultural program focusing on Tribal Culture in a nearby village.</li>
+                    </ul>
+                </div>
+                <div class="itinerary-card">
+                    <h3>Day 3: Trekking & History ⛰📜</h3>
+                    <ul>
+                        <li>Morning: Begin a light trek up Tagore Hill for panoramic views.</li>
+                        <li>Afternoon: Visit the Jagannath Temple (Ranchi's Puri replica).</li>
+                        <li>Evening: Departure.</li>
+                    </ul>
+                </div>
+                <p style="margin-top: 20px; color: #aaa;">AI Note: This ${days}-day itinerary was personalized for your interests (${selectedInterests}). The language used is ${lang.split('-')[0]}. Enjoy your trip to Jharkhand!</p>
+            `;
+            
+            // Scroll to the result
+            resultBox.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- Marketplace Functions ---
+        function renderMarketplace() {
+            const grid = document.getElementById('marketGrid');
+            if (!grid) return;
+            grid.innerHTML = products.map(p => `
+                <div class="product-card">
+                    <h4>${p.title}</h4>
+                    <p class="price">₹${p.price.toLocaleString('en-IN')}</p>
+                    <p>Seller: ${p.seller}</p>
+                    <button>View Details</button>
+                </div>
+            `).join('');
+        }
+
+        function addMarketItem(event) {
+            event.preventDefault();
+            const title = document.getElementById('mTitle').value;
+            const price = parseInt(document.getElementById('mPrice').value);
+            const seller = document.getElementById('mSeller').value;
+
+            products.push({ title, price, seller });
+            renderMarketplace();
+            document.getElementById('marketForm').reset();
+            alert(`Product "${title}" added to the simulated marketplace!`);
+        }
+
+        // --- Guide Registry Functions (Simulated Blockchain) ---
+        function renderGuides() {
+            const list = document.getElementById('guidesList');
+            if (!list) return;
+            list.innerHTML = guides.map(g => `
+                <div class="guide-item">
+                    <span>${g.name} (${g.location})</span>
+                    <span class="${g.verified ? 'verified' : 'unverified'}">
+                        ${g.verified ? '✅ Verified' : '⚠ Unverified'}
+                        ${g.certificate ? ' | 🏅 Certified' : ''}
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        function registerGuide(event) {
+            event.preventDefault();
+            const name = document.getElementById('gName').value;
+            const location = document.getElementById('gLocation').value;
+            
+            guides.push({ id: guides.length + 1, name, location, verified: false, certificate: false });
+            renderGuides();
+            document.getElementById('guideForm').reset();
+            alert(`Guide "${name}" registered on the simulated blockchain! Awaiting admin verification.`);
+        }
+
+        function adminVerifyAll() {
+            guides = guides.map(g => ({ ...g, verified: true }));
+            renderGuides();
+            alert("All guides have been Admin Verified (Simulated Transaction)!");
+        }
+
+        function issueCertificates() {
+            guides = guides.map(g => g.verified ? { ...g, certificate: true } : g);
+            renderGuides();
+            alert("Certificates Issued to all Verified Guides (Simulated Smart Contract Execution)!");
+        }
+
+        // --- Transport Functions (Mock Real-time) ---
+        function renderTransport() {
+            const area = document.getElementById('transportArea');
+            if (!area) return;
+            area.innerHTML = transportVehicles.map(v => `
+                <div class="transport-item">
+                    <span>${v.icon} ${v.type} (${v.distance.toFixed(1)} km)</span>
+                    <span class="eta">ETA: ${v.eta} min</span>
+                </div>
+            `).join('');
+        }
+
+        function updateTransportData() {
+            transportVehicles = transportVehicles.map(v => ({
+                ...v,
+                distance: Math.max(0.1, v.distance - (Math.random() * 0.1 + 0.05)), // decrease distance
+                eta: Math.max(1, v.eta - (Math.random() < 0.3 ? 1 : 0)) // decrease ETA
+            }));
+            renderTransport();
+        }
+
+        function shareLocation() {
+            alert("Location shared! Now fetching nearby transport options...");
+            // Start the transport update simulation
+            setInterval(updateTransportData, 5000); // Update every 5 seconds
+        }
+
+        // --- Feedback & Sentiment Functions (Simulated) ---
+        function sendFeedback() {
+            const text = document.getElementById('feedbackText').value;
+            const resultBox = document.getElementById('sentimentResult');
+
+            if (text.length < 10) {
+                resultBox.innerHTML = '⚠ Please enter more detailed feedback.';
+                resultBox.className = 'resultBox';
+                return;
+            }
+
+            // Simple, rule-based sentiment simulation
+            let sentiment = 0;
+            if (text.toLowerCase().includes('great') || text.toLowerCase().includes('excellent') || text.toLowerCase().includes('loved') || text.toLowerCase().includes('wonderful')) {
+                sentiment = 1;
+            } else if (text.toLowerCase().includes('bad') || text.toLowerCase().includes('poor') || text.toLowerCase().includes('delay') || text.toLowerCase().includes('disappointing')) {
+                sentiment = -1;
+            }
+
+            const score = (0.5 + sentiment * 0.3 + Math.random() * 0.2).toFixed(2); // Base 0.5 + factor + randomness
+
+            let sentimentText = '';
+            let className = 'resultBox';
+            if (score > 0.7) {
+                sentimentText = 'Positive! 🎉 (Score: ' + score + ')';
+                className += ' sentiment-positive';
+            } else if (score < 0.4) {
+                sentimentText = 'Negative. 🙁 (Score: ' + score + ')';
+                className += ' sentiment-negative';
+            } else {
+                sentimentText = 'Neutral. 😐 (Score: ' + score + ')';
+            }
+
+            resultBox.innerHTML = `<strong>Simulated Analysis:</strong> ${sentimentText}<br/>Thank you for your feedback!`;
+            resultBox.className = className;
+        }
+
+        // --- Chatbot UI & Speech Functions ---
+        function openChat() {
+            document.getElementById('chatWindow').classList.remove('hidden');
+            document.getElementById('chatIcon').style.display = 'none';
+        }
+
+        function closeChat() {
+            document.getElementById('chatWindow').classList.add('hidden');
+            document.getElementById('chatIcon').style.display = 'flex';
+        }
+
+        function addMessageToLog(message, isUser) {
+            const log = document.getElementById('chatLog');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `chat-message ${isUser ? 'user-message' : 'assistant-message'}`;
+            msgDiv.textContent = message;
+            log.appendChild(msgDiv);
+            log.scrollTop = log.scrollHeight;
+            
+            if (!isUser) {
+                lastAssistantMessage = message;
+            }
+        }
+
+        function sendChat() {
+            const input = document.getElementById('chatInput');
+            const userText = input.value.trim();
+            if (!userText) return;
+
+            addMessageToLog(userText, true);
+            input.value = '';
+
+            // Simulated AI Response
+            let aiResponse = "I'm sorry, I am currently only a simulation. Try asking about a popular place like 'Hundru Falls' or 'Betla National Park'!";
+            const lowerText = userText.toLowerCase();
+
+            if (lowerText.includes('hundru')) {
+                aiResponse = "Hundru Falls is a spectacular waterfall in Ranchi, formed by the Subarnarekha River. It's one of the highest waterfalls in the state, falling from a height of 98 meters (322 ft)!";
+            } else if (lowerText.includes('betla')) {
+                aiResponse = "Betla National Park is famous for its diverse wildlife, including tigers, elephants, and leopards. It was one of the first parks in India to be declared a Tiger Reserve.";
+            } else if (lowerText.includes('food') || lowerText.includes('eat')) {
+                aiResponse = "You must try Litti Chokha, Dhuska (deep-fried bread with potato curry), and Thekua (a sweet snack) while in Jharkhand!";
+            } else if (lowerText.includes('hello') || lowerText.includes('hi')) {
+                aiResponse = "Johar! (Greetings in a local dialect). How can I help you plan your discovery of Jharkhand today?";
+            }
+            
+            setTimeout(() => addMessageToLog(aiResponse, false), 500);
+        }
+        
+        // Text-to-Speech (TTS)
+    let ttsSynth = window.speechSynthesis;
+    let ttsLang = 'en-IN';
+        
+        function changeTTSlang() {
+            ttsLang = document.getElementById('ttsLang').value;
+            // Optionally, check for voice availability here
+        }
+
+        function speakText(text) {
+            if (!ttsSynth) {
+                alert("Text-to-Speech is not supported by your browser.");
+                return;
+            }
+
+            ttsSynth.cancel(); // Stop any current speech
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = ttsLang;
+            
+            // Find a voice matching the language code
+            const voices = ttsSynth.getVoices();
+            const voice = voices.find(v => v.lang === ttsLang);
+            if (voice) {
+                utterance.voice = voice;
+            }
+
+            ttsSynth.speak(utterance);
+        }
+
+        function speakLast() {
+            if (lastAssistantMessage) {
+                speakText(lastAssistantMessage);
+            } else {
+                alert("The assistant hasn't spoken yet.");
+            }
+        }
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeMap();
+            renderMarketplace();
+            renderGuides();
+            renderTransport();
+            
+            // Start the transport updates
+            setInterval(updateTransportData, 5000); 
+            
+            // Event listener for chat 'Enter' key
+            document.getElementById('chatInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendChat();
+                }
+            });
+
+            // Chatbot button listener
+            document.getElementById('chatIcon').addEventListener('click', openChat);
+
+            // Fetch voices for TTS on load
+            if (ttsSynth.onvoiceschanged !== undefined) {
+                ttsSynth.onvoiceschanged = () => { /* Voices are ready */ };
+            }
+
+            // initialize TTS language from select now that DOM is ready
+            const ttsSelect = document.getElementById('ttsLang');
+            if (ttsSelect) ttsLang = ttsSelect.value || ttsLang;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Track Routes & Festival Calendar</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      margin: 0;
+      height: 100vh;
+    }
+    #map {
+      flex: 2;
+      border: none;
+    }
+    #sidebar {
+      flex: 1;
+      background: #f9f9f9;
+      padding: 20px;
+      box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+      overflow-y: auto;
+    }
+    h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    .festival-list {
+      margin-top: 15px;
+    }
+    .festival-list ul {
+      padding-left: 20px;
+    }
+
+    /* Festival highlighting in calendar */
+    .flatpickr-day.festival-day {
+      background: #ff9800 !important;
+      color: white !important;
+      border-radius: 50%;
+      position: relative;
+    }
+    /* Festival name label inside calendar cell */
+    .flatpickr-day .festival-label {
+      display: block;
+      font-size: 8px;
+      color: #222;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
+  <!-- Calendar library -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+<body>
+  <!-- Map Embed -->
+  <iframe 
+    id="map"
+    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3742802.8087891606!2d83.00466092170942!3d23.63727478924573!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x398b2386df480857%3A0x62c5b809eee29004!2sJharkhand!5e0!3m2!1sen!2sin!4v1757308858644!5m2!1sen!2sin"
+    allowfullscreen=""
+    loading="lazy"
+    referrerpolicy="no-referrer-when-downgrade">
+  </iframe>
+
+  <!-- Sidebar Calendar -->
+  <div id="sidebar">
+    <h2>🎉 Festival Calendar</h2>
+    <label for="placeSelect"><b>Select Place:</b></label>
+    <select id="placeSelect">
+      <option value="">--Choose--</option>
+      <option value="Netarhat">Netarhat</option>
+      <option value="Deoghar">Deoghar</option>
+      <option value="Ranchi">Ranchi</option>
+      <option value="Jamshedpur">Jamshedpur</option>
+      <option value="Dhanbad">Dhanbad</option>
+      <option value="Hazaribagh">Hazaribagh</option>
+      <option value="Giridih">Giridih</option>
+      <option value="Palamu">Palamu</option>
+      <option value="Dumka">Dumka</option>
+      <option value="Chatra">Chatra</option>
+    </select>
+
+    <br><br>
+    <label><b>Select Date:</b></label>
+    <input id="datePicker" placeholder="Pick a date" />
+
+    <div class="festival-list" id="festivalList"></div>
+  </div>
+
+  <script>
+    // Festival data
+    const festivalData = {
+      "Netarhat": [
+        { name: "Karma Festival", date: "2025-09-15" },
+        { name: "Sarhul", date: "2025-04-05" }
+      ],
+      "Deoghar": [
+        { name: "Shravani Mela", date: "2025-07-15" },
+        { name: "Chhath Puja", date: "2025-11-10" }
+      ],
+      "Ranchi": [
+        { name: "Sarhul Festival", date: "2025-03-28" },
+        { name: "Christmas Celebration (Kokar, Ranchi)", date: "2025-12-25" }
+      ],
+      "Jamshedpur": [
+        { name: "Tusu Parab", date: "2025-01-15" },
+        { name: "Kali Puja", date: "2025-11-01" }
+      ],
+      "Dhanbad": [
+        { name: "Chhath Puja", date: "2025-11-10" },
+        { name: "Durga Puja", date: "2025-10-02" }
+      ],
+      "Hazaribagh": [
+        { name: "Diwali Festival", date: "2025-10-20" },
+        { name: "Makar Sankranti Fair", date: "2025-01-14" }
+      ],
+      "Giridih": [
+        { name: "Shivratri at Parasnath Hills", date: "2025-03-01" },
+        { name: "Paryushan (Jain Festival)", date: "2025-08-20" }
+      ],
+      "Palamu": [
+        { name: "Palamu Fort Festival", date: "2025-02-10" },
+        { name: "Betla Eco Festival", date: "2025-12-05" }
+      ],
+      "Dumka": [
+        { name: "Baba Basukinath Mela", date: "2025-07-25" },
+        { name: "Baha Festival (Santhal)", date: "2025-03-15" }
+      ],
+      "Chatra": [
+        { name: "Chatra Mela", date: "2025-04-01" },
+        { name: "Ram Navami", date: "2025-03-30" }
+      ]
+    };
+
+    let selectedPlace = null;
+    let calendar;
+
+    function renderFestivalList(festivals, filterDate = null) {
+      const listDiv = document.getElementById("festivalList");
+      let filtered = festivals;
+      if (filterDate) {
+        filtered = festivals.filter(f => f.date === filterDate);
+      }
+      if (filtered.length > 0) {
+        listDiv.innerHTML = "<b>Festivals:</b><ul>" +
+          filtered.map(f => "<li>" + f.date + " – " + f.name + "</li>").join("") +
+          "</ul>";
+      } else {
+        listDiv.innerHTML = "<i>No festivals on this date.</i>";
+      }
+    }
+
+    // Dropdown listener
+    document.getElementById("placeSelect").addEventListener("change", (e) => {
+      selectedPlace = e.target.value;
+      const festivals = festivalData[selectedPlace] || [];
+
+      // Destroy old calendar
+      if (calendar) {
+        calendar.destroy();
+      }
+
+      // Show all festivals below immediately
+      renderFestivalList(festivals);
+
+      // Initialize new calendar with highlights
+      calendar = flatpickr("#datePicker", {
+        dateFormat: "Y-m-d",
+        inline: true,
+        onDayCreate: function(dObj, dStr, fp, dayElem) {
+          const dayStr = dayElem.dateObj.toISOString().split("T")[0];
+          const match = festivals.find(f => f.date === dayStr);
+          if (match) {
+            dayElem.classList.add("festival-day");
+            // add festival label
+            const label = document.createElement("span");
+            label.className = "festival-label";
+            label.innerText = match.name;
+            dayElem.appendChild(label);
+          }
+        },
+        onChange: function(selectedDates, dateStr) {
+          renderFestivalList(festivals, dateStr);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

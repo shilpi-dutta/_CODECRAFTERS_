@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Analytics — Johar Jharkhand</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="dashWrap">
+    <header class="dashHeader">
+      <h1>Tourism Analytics Dashboard</h1>
+      <a href="index.html">Back to Home</a>
+    </header>
+
+    <section class="dashStats">
+      <div class="statCard">
+        <h3 id="statVisits">0</h3><p>Visits</p>
+      </div>
+      <div class="statCard">
+        <h3 id="statTransactions">0</h3><p>Transactions</p>
+      </div>
+      <div class="statCard">
+        <h3 id="statGuides">0</h3><p>Verified Guides</p>
+      </div>
+    </section>
+
+    <section class="charts dashCharts">
+      <canvas id="visitsChart"></canvas>
+      <canvas id="marketChart"></canvas>
+    </section>
+
+    <footer>
+      <small>Demo analytics — all data is simulated/collected locally.</small>
+    </footer>
+  </div>
+
+  <script>
+    // Pull analytics data from localStorage (collected by app.js)
+    const stats = JSON.parse(localStorage.getItem('jh_analytics') || '{}');
+
+    document.getElementById('statVisits').innerText = stats.visits || 0;
+    document.getElementById('statTransactions').innerText = stats.transactions || 0;
+    document.getElementById('statGuides').innerText = (stats.verifiedGuides || 0);
+
+    const vctx = document.getElementById('visitsChart').getContext('2d');
+    new Chart(vctx, {
+      type: 'line',
+      data: {
+        labels: (stats.monthLabels || ['Jan','Feb','Mar','Apr','May','Jun']),
+        datasets: [{ label:'Monthly Visits', data: (stats.monthVisits || [10,20,30,45,60,80]), borderColor:'#d32f2f', fill:false }]
+      }
+    });
+
+    const mctx = document.getElementById('marketChart').getContext('2d');
+    new Chart(mctx, {
+      type: 'bar',
+      data: {
+        labels: ['Handicrafts','Homestays','Transport','Events'],
+        datasets: [{ label:'Revenue (₹k)', data: (stats.market || [50,30,20,10]), backgroundColor:['#ffb4a2','#ffd6a5','#caffbf','#9bf6ff'] }]
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+/* Reset */
+* { box-sizing:border-box; margin:0; padding:0; font-family: Inter, Arial, sans-serif; }
+
+/* Video background */
+#bg-video { position: fixed; right:0; bottom:0; min-width:100%; min-height:100%; object-fit:cover; z-index:-1; }
+
+/* overlay */
+.overlay { position: relative; min-height:100vh; background: linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)); color: #fff; }
+
+/* header */
+header { display:flex; justify-content:space-between; align-items:center; padding:18px 36px; }
+.brand { font-weight:700; font-size:1.4rem; color:#ffcc00; }
+nav a { color:#fff; margin-left:18px; text-decoration:none; font-weight:600; }
+nav .dashlink { background: rgba(255,255,255,0.1); padding:6px 10px; border-radius:8px; }
+
+/* Hero */
+.hero { text-align:center; padding:60px 18px 30px; }
+.hero h1 { font-size:2.8rem; margin-bottom:10px; letter-spacing:0.6px; }
+.hero h1 span { color:#ffcc00; }
+.hero p { font-size:1rem; margin-bottom:18px; opacity:0.95; }
+.hero-actions { display:flex; gap:10px; justify-content:center; }
+.hero-actions input { padding:12px 14px; border-radius:8px; border:none; width:360px; }
+.hero-actions button { padding:12px 18px; border-radius:8px; border:none; background:#ff6600; color:#fff; font-weight:700; cursor:pointer; }
+
+/* Panels */
+.panel { background: rgba(255,255,255,0.95); color:#222; margin:20px auto; padding:18px; border-radius:12px; max-width:1100px; box-shadow:0 8px 30px rgba(0,0,0,0.15); }
+.panel h2 { margin-bottom:12px; color:#d32f2f; }
+
+/* cols for map */
+.cols { display:flex; gap:12px; align-items:flex-start; }
+.mapbox { height:360px; width:65%; }
+.side { width:35%; padding:8px; }
+
+/* forms */
+label { display:inline-block; margin-right:12px; }
+.resultBox { background:#f8f8f8; padding:12px; border-radius:6px; max-height:300px; overflow:auto; }
+
+/* marketplace */
+.market-grid { display:flex; gap:12px; flex-wrap:wrap; }
+.productCard { width:220px; padding:12px; border-radius:8px; background:#fff; box-shadow:0 6px 18px rgba(0,0,0,0.07); }
+.market-grid input, .market-grid button, form#marketForm input, form#marketForm button { padding:8px; margin:6px 6px 6px 0; }
+
+/* guides */
+#guidesList { margin-top:12px; display:flex; gap:12px; flex-wrap:wrap; }
+.guideBox { width:260px; background:#fff; padding:12px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.07); }
+
+/* transport */
+#transportArea { padding:12px; background:#fff; border-radius:6px; }
+
+/* feedback */
+textarea { width:100%; min-height:80px; padding:8px; border-radius:6px; }
+
+/* chatbot icon & window */
+#chatIcon { position:fixed; right:22px; bottom:22px; background:#ff6600; color:#fff; padding:12px 14px; border-radius:50%; cursor:pointer; font-size:20px; z-index:9999; box-shadow:0 10px 30px rgba(0,0,0,0.25); }
+.chatWindow { position:fixed; right:22px; bottom:78px; width:340px; background:#fff; color:#333; border-radius:10px; box-shadow:0 12px 40px rgba(0,0,0,0.3); z-index:9999; overflow:hidden; }
+.hidden { display:none; }
+.chatHeader { background:#d32f2f; color:#fff; padding:8px 12px; display:flex; justify-content:space-between; align-items:center; }
+.chatLog { height:260px; overflow:auto; padding:10px; background:#f7f7f7; }
+.chatLog p { margin:8px 0; }
+.chatLog .user { text-align:right; color:#fff; background:#ff6600; padding:8px; border-radius:8px; display:inline-block; }
+.chatLog .bot { text-align:left; background:#fff; padding:8px; border-radius:8px; display:inline-block; }
+.chatInput { display:flex; gap:8px; padding:8px; }
+.chatInput input { flex:1; padding:8px; border-radius:6px; border:1px solid #ddd; }
+
+/* footer */
+footer { text-align:center; padding:12px; color:#fff; margin-top:12px; }
+
+/* Signin */
+.signOverlay { display:flex; justify-content:center; align-items:center; height:100vh; }
+.signinCard { background: rgba(255,255,255,0.95); color:#222; padding:20px; border-radius:10px; width:320px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.2); }
+.signinCard input { width:100%; padding:10px; margin:8px 0; border-radius:6px; border:1px solid #ccc; }
+
+/* Dashboard */
+.dashWrap { padding:18px; font-family:Inter,Arial; max-width:1100px; margin:20px auto; }
+.dashHeader { display:flex; justify-content:space-between; align-items:center; }
+.dashStats { display:flex; gap:12px; margin-top:18px; }
+.statCard { background:#fff; padding:18px; border-radius:8px; flex:1; text-align:center; box-shadow:0 8px 20px rgba(0,0,0,0.08); }
+.dashCharts { display:flex; gap:12px; margin-top:18px; }
+canvas { background:#fff; border-radius:8px; padding:8px; }
